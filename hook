@@ -46,5 +46,7 @@ if [[ $* == *--dry-run* ]]; then
     exit 1
   fi
 else
+  export GIT_DIR="$(pwd)/.git"
+  cd $GIT_PREFIX
   "$BINARY" "$("$BINARY" -e "console.log(require.resolve('pre-commit'))")"
 fi
