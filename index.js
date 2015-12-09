@@ -31,6 +31,27 @@ function Hook(fn, options) {
 }
 
 /**
+ * Search for package.json on the current directory and root.
+ * @param  {string} root Git root directory.
+ * @return {string} If found the package.json path, null otherwise.
+ */
+function findPackageJSON(root) {
+  var fs = require('fs');
+  var tries = [];
+  tries.push(path.join(process.cwd(), 'package.json'));
+  if (root) {
+    tries.push(path.join(root, 'package.json'));
+  }
+  return tries.reduce(function(p, v){
+    if (p === null && fs.existsSync(v)) {
+      return v;
+    }
+    return p;
+  }, null);
+}
+
+
+/**
  * Boolean indicating if we're allowed to output progress information into the
  * terminal.
  *
@@ -180,7 +201,8 @@ Hook.prototype.initialize = function initialize() {
   this.root = this.root.stdout.toString().trim();
 
   try {
-    this.json = require(path.join(this.root, 'package.json'));
+    var packageJSONPath = findPackageJSON(this.root);
+    this.json = require(packageJSONPath);
     this.parse();
   } catch (e) { return this.log(this.format(Hook.log.json, e.message), 0); }
 
